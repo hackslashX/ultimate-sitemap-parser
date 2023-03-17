@@ -9,6 +9,80 @@ SITEMAP_PAGE_DEFAULT_PRIORITY = Decimal('0.5')
 """Default sitemap page priority, as per the spec."""
 
 
+class SitemapImage(object):
+    __slots__ = [
+        '__image_url',
+        '__image_title',
+        '__image_caption',
+    ]
+
+    def __init__(self,
+                 image_url: str,
+                 image_title: str,
+                 image_caption: Optional[str] = None):
+        self.__image_url = image_url
+        self.__image_title = image_title
+        self.__image_caption = image_caption
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, SitemapImage):
+            raise NotImplemented
+
+        if self.image_url != other.image_url:
+            return False
+
+        if self.image_title != other.image_title:
+            return False
+        
+        if self.image_caption != other.image_caption:
+            return False
+
+        return True
+
+    def __hash__(self):
+        return hash((
+            self.image_url,
+        ))
+
+    def __repr__(self):
+        return (
+            "{self.__class__.__name__}("
+            "image_title={self.image_title}, "
+            "image_url={self.image_url}, "
+            "image_caption={self.image_caption}"
+            ")"
+        ).format(self=self)
+
+    @property
+    def image_title(self) -> str:
+        """
+        Return image title.
+
+        :return: image title.
+        """
+        return self.__image_title
+
+    @property
+    def image_url(self) -> str:
+        """
+        Return image location.
+
+        :return: image location.
+        """
+        return self.__image_url
+
+    @property
+    def image_caption(self) -> Optional[str]:
+        """
+        Return image caption.
+
+        :return: image caption.
+        """
+        return self.__image_caption
+
+
+
+
 class SitemapNewsStory(object):
     """
     Single story derived from Google News XML sitemap.
@@ -221,6 +295,7 @@ class SitemapPage(object):
         '__last_modified',
         '__change_frequency',
         '__news_story',
+        '__image'
     ]
 
     def __init__(self,
@@ -228,7 +303,8 @@ class SitemapPage(object):
                  priority: Decimal = SITEMAP_PAGE_DEFAULT_PRIORITY,
                  last_modified: Optional[datetime.datetime] = None,
                  change_frequency: Optional[SitemapPageChangeFrequency] = None,
-                 news_story: Optional[SitemapNewsStory] = None):
+                 news_story: Optional[SitemapNewsStory] = None,
+                 image: Optional[SitemapImage] = None):
         """
         Initialize a new sitemap-derived page.
 
@@ -243,6 +319,7 @@ class SitemapPage(object):
         self.__last_modified = last_modified
         self.__change_frequency = change_frequency
         self.__news_story = news_story
+        self.__image = image
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, SitemapPage):
@@ -262,6 +339,9 @@ class SitemapPage(object):
 
         if self.news_story != other.news_story:
             return False
+        
+        if self.image != other.image:
+            return False
 
         return True
 
@@ -278,7 +358,8 @@ class SitemapPage(object):
             "priority={self.priority}, "
             "last_modified={self.last_modified}, "
             "change_frequency={self.change_frequency}, "
-            "news_story={self.news_story}"
+            "news_story={self.news_story}, "
+            "image={self.image}, "
             ")"
         ).format(self=self)
 
@@ -326,3 +407,12 @@ class SitemapPage(object):
         :return: Google News story attached to the URL.
         """
         return self.__news_story
+    
+    @property
+    def image(self) -> Optional[SitemapImage]:
+        """
+        Returns Image in Sitemap
+
+        :return: Sitemap image
+        """
+        return self.__image

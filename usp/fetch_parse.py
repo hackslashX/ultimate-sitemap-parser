@@ -20,6 +20,7 @@ from .log import create_logger
 from .objects.page import (
     SitemapPage,
     SitemapNewsStory,
+    SitemapImage,
     SitemapPageChangeFrequency,
     SITEMAP_PAGE_DEFAULT_PRIORITY,
 )
@@ -285,6 +286,8 @@ class XMLSitemapParser(AbstractSitemapParser):
             name = 'sitemap:{}'.format(name)
         elif '/sitemap-news/' in namespace_url:
             name = 'news:{}'.format(name)
+        elif '/sitemap-image/' in namespace_url:
+            name = 'image:{}'.format(name)
         else:
             # We don't care about the rest of the namespaces, so just keep the plain element name
             pass
@@ -466,6 +469,9 @@ class PagesXMLSitemapParser(AbstractXMLSitemapParser):
             'news_genres',
             'news_keywords',
             'news_stock_tickers',
+            'image_url',
+            'image_title',
+            'image_caption',
         ]
 
         def __init__(self):
@@ -481,6 +487,9 @@ class PagesXMLSitemapParser(AbstractXMLSitemapParser):
             self.news_genres = None
             self.news_keywords = None
             self.news_stock_tickers = None
+            self.image_url = None
+            self.image_title = None
+            self.image_caption = None
 
         def __hash__(self):
             return hash((
@@ -554,6 +563,18 @@ class PagesXMLSitemapParser(AbstractXMLSitemapParser):
                 news_stock_tickers = [x.strip() for x in news_stock_tickers.split(',')]
             else:
                 news_stock_tickers = []
+            
+            image_url = html_unescape_strip(self.image_url)
+            image_title = html_unescape_strip(self.image_title)
+            image_caption = html_unescape_strip(self.image_caption)
+
+            sitemap_image = None
+            if image_url:
+                sitemap_image = SitemapImage(
+                    image_url=image_url,
+                    image_title=image_title,
+                    image_caption=image_caption,
+                )
 
             sitemap_news_story = None
             if news_title and news_publish_date:
@@ -574,6 +595,7 @@ class PagesXMLSitemapParser(AbstractXMLSitemapParser):
                 change_frequency=change_frequency,
                 priority=priority,
                 news_story=sitemap_news_story,
+                image=sitemap_image,
             )
 
     __slots__ = [
@@ -659,6 +681,18 @@ class PagesXMLSitemapParser(AbstractXMLSitemapParser):
             elif name == 'news:stock_tickers':
                 # Element might be present but character data might be empty
                 self._current_page.news_stock_tickers = self._last_char_data
+            
+            elif name == 'image:loc':
+                # Element might be present but character data might be empty
+                self._current_page.image_url = self._last_char_data
+            
+            elif name == 'image:title':
+                # Element might be present but character data might be empty
+                self._current_page.image_title = self._last_char_data
+            
+            elif name == 'image:caption':
+                # Element might be present but character data might be empty
+                self._current_page.image_caption = self._last_char_data
 
         super().xml_element_end(name=name)
 
