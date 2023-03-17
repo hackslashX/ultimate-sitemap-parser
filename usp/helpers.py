@@ -94,7 +94,11 @@ def parse_iso8601_date(date_string: str) -> datetime.datetime:
     if not date_string:
         raise SitemapException("Date string is unset.")
 
-    date = dateutil_parse(date_string)
+    try:
+        date = dateutil_parse(date_string)
+    except Exception as ex:
+        date = None
+        raise SitemapException("Cannot parse date string {}: {}".format(date_string, ex))
 
     return date
 
