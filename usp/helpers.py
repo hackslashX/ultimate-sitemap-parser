@@ -116,6 +116,7 @@ def parse_rfc2822_date(date_string: str) -> datetime.datetime:
 
 def get_url_retry_on_client_errors(url: str,
                                    web_client: AbstractWebClient,
+                                   driver = None,
                                    retry_count: int = 5,
                                    sleep_between_retries: int = 1) -> AbstractWebClientResponse:
     """
@@ -132,7 +133,10 @@ def get_url_retry_on_client_errors(url: str,
     response = None
     for retry in range(0, retry_count):
         log.info("Fetching URL {}...".format(url))
-        response = web_client.get(url)
+        if driver:
+            response = web_client.get(url, driver)
+        else:
+            response = web_client.get(url, None)
 
         if isinstance(response, WebClientErrorResponse):
             log.warning(

@@ -30,7 +30,7 @@ _UNPUBLISHED_SITEMAP_PATHS = {
 """Paths which are not exposed in robots.txt but might still contain a sitemap."""
 
 
-def sitemap_tree_for_homepage(homepage_url: str, web_client: Optional[AbstractWebClient] = None) -> AbstractSitemap:
+def sitemap_tree_for_homepage(homepage_url: str, web_client: Optional[AbstractWebClient] = None, use_undetected_chromium: bool = False) -> AbstractSitemap:
     """
     Using a homepage URL, fetch the tree of sitemaps and pages listed in them.
 
@@ -53,7 +53,9 @@ def sitemap_tree_for_homepage(homepage_url: str, web_client: Optional[AbstractWe
 
     sitemaps = []
 
-    robots_txt_fetcher = SitemapFetcher(url=robots_txt_url, web_client=web_client, recursion_level=0)
+    robots_txt_fetcher = SitemapFetcher(url=robots_txt_url, 
+                                        web_client=web_client, recursion_level=0,
+                                        use_undetected_chromium=use_undetected_chromium)
     robots_txt_sitemap = robots_txt_fetcher.sitemap()
     sitemaps.append(robots_txt_sitemap)
 
@@ -72,6 +74,7 @@ def sitemap_tree_for_homepage(homepage_url: str, web_client: Optional[AbstractWe
                 url=unpublished_sitemap_url,
                 web_client=web_client,
                 recursion_level=0,
+                use_undetected_chromium=use_undetected_chromium
             )
             unpublished_sitemap = unpublished_sitemap_fetcher.sitemap()
 

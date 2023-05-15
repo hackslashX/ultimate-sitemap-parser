@@ -2,7 +2,7 @@
 
 import abc
 from http import HTTPStatus
-from typing import Optional
+from typing import Optional, Any
 
 RETRYABLE_HTTP_STATUS_CODES = {
 
@@ -170,7 +170,7 @@ class AbstractWebClient(object, metaclass=abc.ABCMeta):
         raise NotImplementedError("Abstract method.")
 
     @abc.abstractmethod
-    def get(self, url: str) -> AbstractWebClientResponse:
+    def get(self, url: str, driver: Any) -> AbstractWebClientResponse:
         """
         Fetch an URL and return a response.
 
@@ -181,3 +181,7 @@ class AbstractWebClient(object, metaclass=abc.ABCMeta):
         :return: Response object.
         """
         raise NotImplementedError("Abstract method.")
+    
+    @abc.abstractclassmethod
+    def get_undetected_chromium_flag(self) -> bool:
+        raise NotImplementedError("Abstract Method")

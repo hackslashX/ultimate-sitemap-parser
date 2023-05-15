@@ -41,6 +41,9 @@ setup(
         # Making HTTP requests
         'requests>=2.2.1',
 
+        # Undetected Chromium
+        'undetected-chromedriver==3.4.5',
+
     ],
     setup_requires=[
 

@@ -40,6 +40,7 @@ from .web_client.abstract_client import (
     WebClientErrorResponse,
 )
 from .web_client.requests_client import RequestsWebClient
+from .web_client.undetected_chromium import UndetectedChromiumClient
 
 log = create_logger(__name__)
 
@@ -59,9 +60,10 @@ class SitemapFetcher(object):
         '_url',
         '_recursion_level',
         '_web_client',
+        '_driver'
     ]
 
-    def __init__(self, url: str, recursion_level: int, web_client: Optional[AbstractWebClient] = None):
+    def __init__(self, url: str, recursion_level: int, web_client: Optional[AbstractWebClient] = None, use_undetected_chromium: bool = False):
 
         if recursion_level > self.__MAX_RECURSION_LEVEL:
             raise SitemapException("Recursion level exceeded {} for URL {}.".format(self.__MAX_RECURSION_LEVEL, url))
@@ -69,18 +71,25 @@ class SitemapFetcher(object):
         if not is_http_url(url):
             raise SitemapException("URL {} is not a HTTP(s) URL.".format(url))
 
+        driver = None
+
         if not web_client:
             web_client = RequestsWebClient()
+        
+        if use_undetected_chromium:
+            web_client = UndetectedChromiumClient()
+            driver = web_client.get_driver()
 
         web_client.set_max_response_data_length(self.__MAX_SITEMAP_SIZE)
 
         self._url = url
         self._web_client = web_client
+        self._driver = driver
         self._recursion_level = recursion_level
 
     def sitemap(self) -> AbstractSitemap:
         log.info("Fetching level {} sitemap from {}...".format(self._recursion_level, self._url))
-        response = get_url_retry_on_client_errors(url=self._url, web_client=self._web_client)
+        response = get_url_retry_on_client_errors(url=self._url, web_client=self._web_client, driver=self._driver)
 
         if isinstance(response, WebClientErrorResponse):
             return InvalidSitemap(
@@ -179,6 +188,7 @@ class IndexRobotsTxtSitemapParser(AbstractSitemapParser):
                 url=sitemap_url,
                 recursion_level=self._recursion_level,
                 web_client=self._web_client,
+                use_undetected_chromium=self._web_client.get_undetected_chromium_flag()
             )
             fetched_sitemap = fetcher.sitemap()
             sub_sitemaps.append(fetched_sitemap)
@@ -433,7 +443,8 @@ class IndexXMLSitemapParser(AbstractXMLSitemapParser):
             try:
                 fetcher = SitemapFetcher(url=sub_sitemap_url,
                                          recursion_level=self._recursion_level + 1,
-                                         web_client=self._web_client)
+                                         web_client=self._web_client,
+                                         use_undetected_chromium=self._web_client.get_undetected_chromium_flag())
                 fetched_sitemap = fetcher.sitemap()
             except Exception as ex:
                 fetched_sitemap = InvalidSitemap(

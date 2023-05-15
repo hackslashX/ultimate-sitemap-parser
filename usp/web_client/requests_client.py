@@ -72,13 +72,16 @@ class RequestsWebClient(AbstractWebClient):
     __slots__ = [
         '__max_response_data_length',
         '__timeout',
-        '__proxies',
+        '__proxies'
     ]
 
     def __init__(self):
         self.__max_response_data_length = None
         self.__timeout = self.__HTTP_REQUEST_TIMEOUT
         self.__proxies = {}
+    
+    def get_undetected_chromium_flag(self):
+        return False
 
     def set_timeout(self, timeout: int) -> None:
         """Set HTTP request timeout."""
@@ -102,7 +105,7 @@ class RequestsWebClient(AbstractWebClient):
     def set_max_response_data_length(self, max_response_data_length: int) -> None:
         self.__max_response_data_length = max_response_data_length
 
-    def get(self, url: str) -> AbstractWebClientResponse:
+    def get(self, url: str, driver = None) -> AbstractWebClientResponse:
         try:
             response = requests.get(
                 url,
