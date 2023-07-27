@@ -42,7 +42,7 @@ setup(
         'requests>=2.2.1',
 
         # Undetected Chromium
-        'undetected-chromedriver==3.4.5',
+        'undetected-chromedriver>=3.5.0',
 
     ],
     setup_requires=[
