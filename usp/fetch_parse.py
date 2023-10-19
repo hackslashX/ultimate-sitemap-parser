@@ -533,7 +533,11 @@ class PagesXMLSitemapParser(AbstractXMLSitemapParser):
 
             priority = html_unescape_strip(self.priority)
             if priority:
-                priority = Decimal(priority)
+                try:
+                    priority = Decimal(priority)
+                except:
+                    # In case of incorrect priority, assign a default 1.0
+                    priority = Decimal('1.0')
 
                 comp_zero = priority.compare(Decimal('0.0'))
                 comp_one = priority.compare(Decimal('1.0'))
